@@ -1,20 +1,17 @@
 import 'dart:ui';
 import 'package:boids/boid.dart';
 import 'package:boids/obstacle.dart';
-import 'package:flame/flame.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/gestures.dart';
 
 class BoidsGame extends Game {
-  Size screenSize;
+  final Size screenSize;
   List<Boid> boids = List<Boid>(); 
   List<Obstacle> obstacles = List<Obstacle>();
-  double tileSize; double sw; double sh;
+  double tileSize, sw, sh;
 
-  BoidsGame() {initialize();}
-
-  void initialize() async {
-    resize(await Flame.util.initialDimensions());
+  BoidsGame(this.screenSize) {
+    tileSize = screenSize.width / 100;
     sw = screenSize.width;
     sh = screenSize.height;
     spawnObstacle(sw*0.25, sh*0.20);
@@ -27,20 +24,14 @@ class BoidsGame extends Game {
   void render(Canvas canvas) {
     Rect bgRect = Rect.fromLTWH(0, 0, screenSize.width, screenSize.height);
     Paint bgPaint = Paint();
-    bgPaint.color = Color(0xff4f4d4a);
+    bgPaint.color = Color(0xff30302f);
     canvas.drawRect(bgRect, bgPaint);
     boids.forEach((Boid boid) => boid.render(canvas));
     obstacles.forEach((Obstacle obstacle) => obstacle.render(canvas));
   }
 
-  void update(double t) => boids.forEach((Boid boid) => boid.update(t)); 
-
-  void resize(Size size) {
-    screenSize = size;
-    tileSize = screenSize.width / 100;
-  }
-
-  void onTapDown(TapDownDetails d) => spawnBoid(d.globalPosition.dx, d.globalPosition.dy); 
+  void update(double t) => boids.forEach((Boid boid) => boid.update(t));
+  void onTapDown(TapDownDetails d) => spawnBoid(d.globalPosition.dx, d.globalPosition.dy);
   void spawnBoid(double xx, double yy) => boids.add(Boid(this, xx, yy));
   void spawnObstacle(double xx, double yy) => obstacles.add(Obstacle(xx, yy));
 }

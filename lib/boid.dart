@@ -1,20 +1,19 @@
+import 'dart:math';
 import 'dart:ui';
 import 'package:vector_math/vector_math.dart';
 import 'package:boids/boidsGame.dart';
 
 class Boid {
   final BoidsGame game;
-  Vector2 position; Vector2 velocity;
-  Rect boidRect; Paint boidPaint;
+  Vector2 position, velocity = Vector2.zero(); 
+  Rect boidRect; Paint boidPaint = Paint();
   List<Boid> _neighbours = List<Boid>();
   int _thinkTimer = 0;
 
   Boid(this.game, double xx, double yy) {
     position = Vector2(xx, yy);
-    velocity = Vector2(0, 0);
     boidRect = Rect.fromLTWH(xx, yy, game.tileSize, game.tileSize);
-    boidPaint = Paint();
-    boidPaint.color = Color(0xffff5100);
+    boidPaint.color = Color((Random().nextDouble()*0xFFFFFFFF).toInt() << 0);
   }
 
   void render(Canvas c) => c.drawRect(boidRect, boidPaint);
@@ -30,8 +29,8 @@ class Boid {
 
   void flock() {
     Vector2 noise = Vector2.random() * 2 - Vector2(1, 1);
-    velocity += getAllRules() + (getObstaclesAvoid() * 15) + (noise * 0.25);
-    velocity.length = 2.0;
+    velocity += getAllRules() + (getObstaclesAvoid() * 25) + (noise * 0.35);
+    velocity.length = 2;
   }
 
   void getNeighbours() {
@@ -71,13 +70,10 @@ class Boid {
         if (distance < 25) separationSteer.add((this.position - neighbour.position).normalized() / distance);
       }
     });
-    count > 0
-        ? (cohesionSum = (cohesionSum / count) - position).length = 0.01
-        : cohesionSum = Vector2.zero();
+    count > 0 ? (cohesionSum = (cohesionSum / count) - position).length = 0.1 : cohesionSum = Vector2.zero();
     return allignmentSum + separationSteer + cohesionSum;
   }
 
   void increment() =>_thinkTimer = (_thinkTimer + 1) % 5;
-
   void checkBounds() => boidRect = Rect.fromLTWH((boidRect.left + game.sw) % game.sw,(boidRect.top + game.sh) % game.sh, game.tileSize, game.tileSize);
 }
